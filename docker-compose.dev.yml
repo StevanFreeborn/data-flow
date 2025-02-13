@@ -1,0 +1,70 @@
+name: onxflow-development
+services:
+  mailhog:
+    container_name: mailhog-development
+    image: mailhog/mailhog:latest
+    volumes:
+      - "mailhog_development_data:/home/mailhog"
+    ports:
+      - "2996:1025"
+      - "2997:8025"
+    restart: unless-stopped
+    environment:
+      - MH_STORAGE=maildir
+      - MH_MAILDIR_PATH=/home/mailhog
+  mongodb:
+    container_name: mongo-development
+    image: mongo:latest
+    ports:
+      - '2998:27017'
+    volumes:
+      - 'onxflow_mongodb_development_data:/data/db'
+    restart: unless-stopped
+    env_file:
+      - src/OnxFlow.Server/src/OnxFlow.Server.API/.env
+  mongo-express:
+    depends_on:
+      - mongodb
+    container_name: mongo-express
+    image: mongo-express:latest
+    restart: unless-stopped
+    ports:
+      - 2999:8081
+    env_file:
+      - src/OnxFlow.Server/src/OnxFlow.Server.API/.env
+  server:
+    depends_on:
+      - mongodb
+      - mailhog
+    container_name: server-api-development
+    build:
+      target: development-stage
+      context: ./src/OnxFlow.Server
+      dockerfile: OnxFlow.Server.API.Dockerfile
+    volumes:
+      - './src/OnxFlow.Server:/app'
+      - '~/.aspnet/https:/https/'
+    ports:
+      - '3002:3002'
+    restart: unless-stopped
+    env_file:
+      - src/OnxFlow.Server/src/OnxFlow.Server.API/.env
+  client:
+    depends_on:
+      - server
+    container_name: vue-client-development
+    build:
+      target: development-stage
+      context: ./src/OnxFlow.Client
+      dockerfile: Dockerfile
+    volumes:
+      - './src/OnxFlow.Client:/app'
+      - '/app/node_modules'
+    ports:
+      - '3001:3001'
+    restart: unless-stopped
+    env_file:
+      - src/OnxFlow.Client/.env
+volumes:
+  onxflow_mongodb_development_data:
+  mailhog_development_data:

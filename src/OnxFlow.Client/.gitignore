@@ -1,3 +1,6 @@
+# env
+*.env*
+
 # Logs
 logs
 *.log
@@ -13,6 +16,7 @@ dist
 dist-ssr
 coverage
 *.local
+.certs/
 
 /cypress/videos/
 /cypress/screenshots/

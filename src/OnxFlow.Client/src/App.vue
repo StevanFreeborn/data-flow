@@ -1,11 +1,20 @@
 <script setup lang="ts">
-  import HelloWorld from './components/HelloWorld.vue';
+  import { onMounted, ref } from 'vue';
+import HelloWorld from './components/HelloWorld.vue';
+
+  const test = ref<string>('');
+
+  onMounted(async () => {
+    const res = await fetch('/api');
+    test.value = await res.text();
+  });
 </script>
 
 <template>
   <header>
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
+      {{ test }}
     </div>
   </header>
 </template>
