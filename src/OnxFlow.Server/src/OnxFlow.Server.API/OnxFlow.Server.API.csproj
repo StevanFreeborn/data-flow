@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
  
   <ItemGroup>
+    <PackageReference Include="FluentResults" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="Microsoft.Extensions.Options" />
