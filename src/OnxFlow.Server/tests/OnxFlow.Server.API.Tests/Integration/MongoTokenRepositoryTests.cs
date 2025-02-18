@@ -31,4 +31,18 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>
 
     createdToken.Should().NotBeNull();
   }
+
+  [Fact]
+  public async Task GetAsync_WhenCalled_ItShouldReturnToken()
+  {
+    var newToken = FakeDataFactory.VerificationToken.Generate();
+
+    await _context.GetCollection<BaseToken>()
+      .InsertOneAsync(newToken);
+
+    var result = await _sut.GetAsync(FilterSpecification<BaseToken>.From(t => t.Id == newToken.Id));
+
+    result.Should().NotBeNull();
+    result!.Id.Should().Be(newToken.Id);
+  }
 }

@@ -30,4 +30,18 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
 
     createdUser.Should().NotBeNull();
   }
+
+  [Fact]
+  public async Task GetAsync_WhenCalled_ItShouldReturnUser()
+  {
+    var (_, newUser) = FakeDataFactory.TestUser.Generate();
+
+    await _context.GetCollection<User>()
+      .InsertOneAsync(newUser);
+
+    var result = await _sut.GetAsync(FilterSpecification<User>.From(u => u.Id == newUser.Id));
+
+    result.Should().NotBeNull();
+    result!.Id.Should().Be(newUser.Id);
+  }
 }

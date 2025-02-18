@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace OnxFlow.Server.API.Tests.Data;
 
 internal static class FakeDataFactory
@@ -23,6 +25,20 @@ internal static class FakeDataFactory
     .RuleFor(static t => t.ExpiresAt, static f => DateTime.UtcNow.AddMinutes(15))
     .RuleFor(static t => t.Revoked, false)
     .RuleFor(static t => t.TokenType, "Verification");
+
+  internal static readonly Faker<JwtOptions> JwtOption = new Faker<JwtOptions>()
+    .RuleFor(static j => j.Audience, f => f.Internet.DomainName())
+    .RuleFor(static j => j.ExpiryInMinutes, f => f.Random.Int(1, 60))
+    .RuleFor(static j => j.Issuer, f => f.Internet.DomainName())
+    .RuleFor(static j => j.Secret, GenerateJwtSecret());
+
+  private static string GenerateJwtSecret()
+  {
+    var secret = new byte[32];
+    using var rng = RandomNumberGenerator.Create();
+    rng.GetBytes(secret);
+    return Convert.ToBase64String(secret);
+  }
 }
 
 internal sealed class UserGenerator

@@ -3,7 +3,10 @@ namespace OnxFlow.Server.API.Tests.Infrastructure;
 public class AppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
   private const string MongoDbImage = "mongo:latest";
-  private readonly MongoDbContainer _mongoDbContainer = new MongoDbBuilder().WithImage(MongoDbImage).Build();
+  private readonly MongoDbContainer _mongoDbContainer = new MongoDbBuilder()
+      .WithImage(MongoDbImage)
+      .Build();
+
   private readonly IContainer _mailHogContainer = new ContainerBuilder()
     .WithImage("mailhog/mailhog")
     .WithPortBinding(1025, true)
@@ -22,6 +25,14 @@ public class AppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     builder.ConfigureTestServices(services =>
     {
+      services.Configure<JwtOptions>(options =>
+      {
+        options.Secret = TestJwtTokenBuilder.TestJwtSecret;
+        options.Audience = TestJwtTokenBuilder.TestJwtAudience;
+        options.Issuer = TestJwtTokenBuilder.TestJwtIssuer;
+        options.ExpiryInMinutes = TestJwtTokenBuilder.TestJwtExpiryInMinutes;
+      });
+
       services.Configure<MongoDbOptions>(options =>
       {
         options.ConnectionString = _mongoDbContainer.GetConnectionString();
@@ -54,5 +65,4 @@ public class AppFactory : WebApplicationFactory<Program>, IAsyncLifetime
     await _mongoDbContainer.DisposeAsync();
     await _mailHogContainer.DisposeAsync();
   }
-
 }

@@ -1,24 +1,72 @@
-
-using System.Text.RegularExpressions;
-
 namespace OnxFlow.Server.API.Authentication;
 
 internal class TokenService(
   TimeProvider timeProvider,
-  IRepository<BaseToken> tokenRepository
+  IRepository<BaseToken> tokenRepository,
+  IOptions<JwtOptions> jwtOptions
 ) : ITokenService
 {
   private readonly TimeProvider _timeProvider = timeProvider;
   private readonly IRepository<BaseToken> _tokenRepository = tokenRepository;
+  private readonly JwtOptions _jwtOptions = jwtOptions.Value;
 
   public string GenerateAccessToken(User existingUser)
   {
-    throw new NotImplementedException();
+    var tokenHandler = new JwtSecurityTokenHandler();
+    var key = Encoding.UTF8.GetBytes(_jwtOptions.Secret);
+    var issuedAt = _timeProvider.GetUtcNow();
+    var expires = issuedAt.AddMinutes(_jwtOptions.ExpiryInMinutes);
+    var claims = new List<Claim>
+    {
+      new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+      new(JwtRegisteredClaimNames.Sub, existingUser.Id),
+      new(JwtRegisteredClaimNames.NameId, existingUser.Username),
+      new(JwtRegisteredClaimNames.Email, existingUser.Email),
+    };
+
+    var tokenDescriptor = new SecurityTokenDescriptor
+    {
+      Subject = new ClaimsIdentity(claims),
+      Expires = expires.UtcDateTime,
+      IssuedAt = issuedAt.UtcDateTime,
+      Issuer = _jwtOptions.Issuer,
+      Audience = _jwtOptions.Audience,
+      SigningCredentials = new SigningCredentials(
+        new SymmetricSecurityKey(key),
+        SecurityAlgorithms.HmacSha256Signature
+      )
+    };
+
+    var securityToken = tokenHandler.CreateToken(tokenDescriptor);
+    var jwtToken = tokenHandler.WriteToken(securityToken);
+    return jwtToken;
   }
 
-  public Task<Result<RefreshToken>> GenerateRefreshToken(string userId)
+  public async Task<Result<RefreshToken>> GenerateRefreshToken(string userId)
   {
-    throw new NotImplementedException();
+    var expiresAt = _timeProvider
+      .GetUtcNow()
+      .AddHours(12)
+      .UtcDateTime;
+
+    var token = new RefreshToken
+    {
+      UserId = userId,
+      Token = GenerateToken(),
+      ExpiresAt = expiresAt
+    };
+
+    try
+    {
+      var createdToken = await _tokenRepository.CreateAsync(token);
+      return Result.Ok(token);
+    }
+    catch (Exception ex)
+    {
+      return Result.Fail(
+        new GenerateRefreshTokenError().CausedBy(ex)
+      );
+    }
   }
 
   public async Task<Result<VerificationToken>> GenerateVerificationToken(string userId)
