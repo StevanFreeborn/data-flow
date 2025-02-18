@@ -1,5 +1,3 @@
-using System.Net.Mail;
-
 namespace OnxFlow.Server.API.Tests.Unit;
 
 public class DotNetEmailServiceTests
