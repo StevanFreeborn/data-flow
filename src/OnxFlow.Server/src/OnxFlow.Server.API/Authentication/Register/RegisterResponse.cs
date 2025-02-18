@@ -1,3 +1,3 @@
 namespace OnxFlow.Server.API.Authentication.Register;
 
-internal record RegisterUserResponse(string Id);
+internal record RegisterResponse(string Id);

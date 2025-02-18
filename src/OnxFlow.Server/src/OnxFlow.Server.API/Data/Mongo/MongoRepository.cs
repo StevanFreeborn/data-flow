@@ -48,7 +48,7 @@ internal abstract class MongoRepository<T>(MongoDbContext context) : IRepository
     return new(pageNumber, pageSize, totalPages, totalItems, items);
   }
 
-  public virtual async Task<T> GetAsync(FilterSpecification<T> spec)
+  public virtual async Task<T?> GetAsync(FilterSpecification<T> spec)
   {
     return await _collection.Find(spec.ToExpression()).FirstOrDefaultAsync();
   }

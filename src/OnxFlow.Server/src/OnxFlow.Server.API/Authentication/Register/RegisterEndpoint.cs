@@ -1,15 +1,15 @@
 namespace OnxFlow.Server.API.Authentication.Register;
 
-internal class RegisterEndpoint
+internal static class RegisterEndpoint
 {
   private const string Route = "/register";
 
-  public void MapEndpoint(WebApplication app)
+  public static void MapRegisterEndpoint(this WebApplication app)
   {
     app.MapPost(Route, HandleAsync);
   }
 
-  private async Task<IResult> HandleAsync([AsParameters] RegisterRequest req)
+  private static async Task<IResult> HandleAsync([AsParameters] RegisterRequest req)
   {
     var validationResult = await req.Validator.ValidateAsync(req.Dto);
 
@@ -55,7 +55,7 @@ internal class RegisterEndpoint
 
     return Results.Created(
       uri: $"/users/{registrationResult.Value}",
-      value: new RegisterUserResponse(registrationResult.Value)
+      value: new RegisterResponse(registrationResult.Value)
     );
   }
 
@@ -66,13 +66,13 @@ internal class RegisterEndpoint
     {
       To = email,
       Subject = "Welcome to OnxFlow! Verify your account to get started.",
-      HtmlContent = @$"
+      HtmlContent = $"""
         <h1>Welcome to OnxFlow!</h1>
         <p>We're excited to welcome you to OnxFlow! Before you begin we need to verify your account. Follow these steps to complete the verification process:</p>
         <p>Click the link below to verify your account:</p>
         <a href='{origin}/open/verify-account?t={token}'>Verify Account</a>
         <p>If you didn't create an account with OnxFlow, please ignore this email.</p>
-      "
+      """
     };
   }
 }

@@ -1,7 +1,8 @@
 namespace OnxFlow.Server.API.Data.Mongo;
 
-internal class MongoDbContext
+internal class MongoDbContext : IDisposable
 {
+  private readonly MongoClient _client;
   private const string UserCollectionName = "users";
   private const string TokenCollectionName = "tokens";
 
@@ -10,8 +11,8 @@ internal class MongoDbContext
   public MongoDbContext(IOptions<MongoDbOptions> options)
   {
     MongoClassMap.RegisterMappings();
-    using var client = new MongoClient(options.Value.ConnectionString);
-    _database = client.GetDatabase(options.Value.DatabaseName);
+    _client = new MongoClient(options.Value.ConnectionString);
+    _database = _client.GetDatabase(options.Value.DatabaseName);
   }
 
   public IMongoCollection<T> GetCollection<T>() where T : Entity
@@ -22,5 +23,10 @@ internal class MongoDbContext
       Type t when t == typeof(BaseToken) => _database.GetCollection<T>(TokenCollectionName),
       _ => throw new ArgumentException($"Collection for type {typeof(T).Name} not found.")
     };
+  }
+
+  public void Dispose()
+  {
+    _client?.Dispose();
   }
 }

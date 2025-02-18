@@ -9,7 +9,7 @@ internal interface IRepository<T> where T : Entity
     SortSpecification<T> sort
   );
 
-  Task<T> GetAsync(FilterSpecification<T> spec);
+  Task<T?> GetAsync(FilterSpecification<T> spec);
   Task<T> CreateAsync(T entity);
   Task<bool> DeleteAsync(FilterSpecification<T> spec);
   Task<bool> DeleteManyAsync(FilterSpecification<T> spec);
