@@ -63,9 +63,7 @@ internal class TokenService(
     }
     catch (Exception ex)
     {
-      return Result.Fail(
-        new GenerateRefreshTokenError().CausedBy(ex)
-      );
+      return Result.Fail(new GenerateRefreshTokenError().CausedBy(ex));
     }
   }
 
@@ -90,9 +88,7 @@ internal class TokenService(
     }
     catch (Exception ex)
     {
-      return Result.Fail(
-        new GenerateVerificationTokenError().CausedBy(ex)
-      );
+      return Result.Fail(new GenerateVerificationTokenError().CausedBy(ex));
     }
   }
 
@@ -106,9 +102,15 @@ internal class TokenService(
     throw new NotImplementedException();
   }
 
-  public Task RemoveAllInvalidVerificationTokensAsync(string userId)
+  public async Task RemoveAllInvalidVerificationTokensAsync(string userId)
   {
-    throw new NotImplementedException();
+    var filter = FilterSpecification<BaseToken>.From(
+      t => t.UserId == userId &&
+        t.TokenType == TokenTypes.Verification &&
+        (t.Revoked || t.ExpiresAt < _timeProvider.GetUtcNow().DateTime)
+    );
+
+    await _tokenRepository.DeleteManyAsync(filter);
   }
 
   public Task RevokeRefreshTokenAsync(string userId, string refreshToken)
@@ -121,14 +123,45 @@ internal class TokenService(
     throw new NotImplementedException();
   }
 
-  public Task RevokeVerificationTokenAsync(string token)
+  public async Task RevokeVerificationTokenAsync(string token)
   {
-    throw new NotImplementedException();
+    var filter = FilterSpecification<BaseToken>.From(t => t.Token == token);
+    var existingToken = await _tokenRepository.GetAsync(filter);
+
+    if (existingToken is null)
+    {
+      return;
+    }
+
+    var updatedToken = new VerificationToken(existingToken)
+    {
+      Revoked = true
+    };
+
+    await _tokenRepository.UpdateAsync(filter, updatedToken);
   }
 
-  public Task<Result<BaseToken>> VerifyVerificationTokenAsync(string token)
+  public async Task<Result<BaseToken>> VerifyVerificationTokenAsync(string token)
   {
-    throw new NotImplementedException();
+    var filter = FilterSpecification<BaseToken>.From(t => t.Token == token && t.TokenType == TokenTypes.Verification);
+    var verificationToken = await _tokenRepository.GetAsync(filter);
+
+    if (verificationToken is null)
+    {
+      return Result.Fail(new TokenDoesNotExistError(token));
+    }
+
+    if (verificationToken.Revoked)
+    {
+      return Result.Fail(new InvalidTokenError(token));
+    }
+
+    if (verificationToken.ExpiresAt < _timeProvider.GetUtcNow().UtcDateTime)
+    {
+      return Result.Fail(new ExpiredTokenError(token));
+    }
+
+    return Result.Ok(verificationToken);
   }
 
   private static string GenerateToken()

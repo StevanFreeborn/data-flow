@@ -4,6 +4,15 @@ internal class VerificationToken : BaseToken
 {
   internal VerificationToken() : base()
   {
-    TokenType = "Verification";
+    TokenType = TokenTypes.Verification;
+  }
+
+  internal VerificationToken(BaseToken token) : base(token)
+  {
+    TokenType = TokenTypes.Verification;
+  }
+
+  internal VerificationToken(VerificationToken token) : base(token)
+  {
   }
 }

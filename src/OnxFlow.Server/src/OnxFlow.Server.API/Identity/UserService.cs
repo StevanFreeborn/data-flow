@@ -79,9 +79,26 @@ internal class UserService(
     return Result.Ok(createdUser.Id);
   }
 
-  public Task<Result> VerifyUserAsync(string userId)
+  public async Task<Result> VerifyUserAsync(string userId)
   {
-    throw new NotImplementedException();
+    var filter = FilterSpecification<User>.From(u => u.Id == userId);
+    var existingUser = await _userRepository.GetAsync(filter);
+
+    if (existingUser is null)
+    {
+      return Result.Fail(new UserDoesNotExistError(userId));
+    }
+
+    if (existingUser.IsVerified)
+    {
+      return Result.Fail(new UserAlreadyVerifiedError(userId));
+    }
+
+    existingUser.IsVerified = true;
+
+    await _userRepository.UpdateAsync(filter, existingUser);
+
+    return Result.Ok();
   }
 
   private async Task<string> GenerateUniqueUsernameAsync(string email)

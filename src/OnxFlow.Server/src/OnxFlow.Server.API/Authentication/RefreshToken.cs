@@ -4,6 +4,15 @@ internal class RefreshToken : BaseToken
 {
   internal RefreshToken() : base()
   {
-    TokenType = "Refresh";
+    TokenType = TokenTypes.Refresh;
+  }
+
+  internal RefreshToken(BaseToken token) : base(token)
+  {
+    TokenType = TokenTypes.Refresh;
+  }
+
+  internal RefreshToken(RefreshToken token) : base(token)
+  {
   }
 }

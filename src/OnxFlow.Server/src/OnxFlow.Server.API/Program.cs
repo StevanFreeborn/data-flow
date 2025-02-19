@@ -22,6 +22,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
+builder.Services.AddScoped<IValidator<VerifyAccountDto>, VerifyAccountDtoValidator>();
 
 builder.AddCORS();
 
@@ -40,6 +41,7 @@ app.UseCORS();
 
 app.MapRegisterEndpoint();
 app.MapLoginEndpoint();
+app.MapVerifyAccountEndpoint();
 app.MapGet("/", static () => "Hello World!");
 
 app.Run();

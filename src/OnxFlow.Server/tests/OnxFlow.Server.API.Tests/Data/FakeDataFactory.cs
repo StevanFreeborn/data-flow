@@ -24,13 +24,22 @@ internal static class FakeDataFactory
     .RuleFor(static t => t.Token, static f => f.Random.AlphaNumeric(32))
     .RuleFor(static t => t.ExpiresAt, static f => DateTime.UtcNow.AddMinutes(15))
     .RuleFor(static t => t.Revoked, false)
-    .RuleFor(static t => t.TokenType, "Verification");
+    .RuleFor(static t => t.TokenType, TokenTypes.Verification);
 
   internal static readonly Faker<JwtOptions> JwtOption = new Faker<JwtOptions>()
-    .RuleFor(static j => j.Audience, f => f.Internet.DomainName())
-    .RuleFor(static j => j.ExpiryInMinutes, f => f.Random.Int(1, 60))
-    .RuleFor(static j => j.Issuer, f => f.Internet.DomainName())
+    .RuleFor(static j => j.Audience, static f => f.Internet.DomainName())
+    .RuleFor(static j => j.ExpiryInMinutes, static f => f.Random.Int(1, 60))
+    .RuleFor(static j => j.Issuer, static f => f.Internet.DomainName())
     .RuleFor(static j => j.Secret, GenerateJwtSecret());
+
+  internal static readonly Faker<RefreshToken> RefreshToken = new Faker<RefreshToken>()
+    .CustomInstantiator(static f => new RefreshToken())
+    .RuleFor(static t => t.Id, static f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(static t => t.UserId, static f => ObjectId.GenerateNewId().ToString())
+    .RuleFor(static t => t.Token, static f => f.Random.AlphaNumeric(32))
+    .RuleFor(static t => t.ExpiresAt, static f => DateTime.UtcNow.AddHours(12))
+    .RuleFor(static t => t.Revoked, false)
+    .RuleFor(static t => t.TokenType, TokenTypes.Refresh);
 
   private static string GenerateJwtSecret()
   {

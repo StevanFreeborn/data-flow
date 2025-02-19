@@ -7,4 +7,18 @@ internal class BaseToken : Entity
   public DateTimeOffset ExpiresAt { get; init; } = DateTimeOffset.UtcNow;
   public bool Revoked { get; init; }
   public string TokenType { get; init; } = string.Empty;
+
+  internal BaseToken()
+  {
+  }
+
+  internal BaseToken(BaseToken token)
+  {
+    Id = token.Id;
+    UserId = token.UserId;
+    Token = token.Token;
+    ExpiresAt = token.ExpiresAt;
+    Revoked = token.Revoked;
+    TokenType = token.TokenType;
+  }
 }

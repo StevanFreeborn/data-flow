@@ -22,6 +22,7 @@ global using MongoDB.Driver;
 global using OnxFlow.Server.API.Authentication;
 global using OnxFlow.Server.API.Authentication.Register;
 global using OnxFlow.Server.API.Authentication.Login;
+global using OnxFlow.Server.API.Authentication.Verify;
 global using OnxFlow.Server.API.Cors;
 global using OnxFlow.Server.API.Data;
 global using OnxFlow.Server.API.Data.Mongo;
