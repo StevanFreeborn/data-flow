@@ -15,7 +15,6 @@ internal abstract class MongoRepository<T>(MongoDbContext context) : IRepository
       PipelineDefinition<T, AggregateCountResult>.Create([match, PipelineStageDefinitionBuilder.Count<T>()])
     );
 
-
     var itemsFacet = AggregateFacet.Create(
       ItemsFacetName,
       PipelineDefinition<T, T>.Create(

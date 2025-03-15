@@ -96,7 +96,6 @@ internal class TokenService(
 
   public Task<Result<(string AccessToken, RefreshToken RefreshToken)>> RefreshAccessTokenAsync(string userId, string refreshToken)
   {
-    throw new NotImplementedException();
   }
 
   public async Task RemoveAllInvalidRefreshTokensAsync(string userId)
@@ -147,9 +146,10 @@ internal class TokenService(
     await _tokenRepository.UpdateAsync(filter, updatedToken);
   }
 
-  public Task RevokeUserVerificationTokensAsync(string userId)
+  public async Task RevokeUserVerificationTokensAsync(string userId)
   {
-    throw new NotImplementedException();
+    var filter = FilterSpecification<BaseToken>.From(t => t.UserId == userId && t.TokenType == TokenTypes.Verification);
+    var existingTokens = await _tokenRepository.GetAsync(filter);
   }
 
   public async Task RevokeVerificationTokenAsync(string token)

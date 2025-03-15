@@ -12,9 +12,17 @@ internal class UserService(
   private readonly ILogger<UserService> _logger = logger;
   private readonly ITokenService _tokenService = tokenService;
 
-  public Task<Result<User>> GetUserByEmailAsync(string userEmail)
+  public async Task<Result<User>> GetUserByEmailAsync(string userEmail)
   {
-    throw new NotImplementedException();
+    var filter = FilterSpecification<User>.From(u => u.Email == userEmail);
+    var existingUser = await _userRepository.GetAsync(filter);
+
+    if (existingUser is null)
+    {
+      return Result.Fail(new UserDoesNotExistError(userEmail));
+    }
+
+    return Result.Ok(existingUser);
   }
 
   public Task<Result<User>> GetUserByIdAsync(string userId)

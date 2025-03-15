@@ -23,6 +23,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
 builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
 builder.Services.AddScoped<IValidator<VerifyAccountDto>, VerifyAccountDtoValidator>();
+builder.Services.AddScoped<IValidator<ResendVerificationEmailDto>, ResendVerificationEmailDtoValidator>();
 
 var jwtOptions = new JwtOptions();
 builder.Configuration.GetSection(nameof(JwtOptions)).Bind(jwtOptions);
@@ -76,6 +77,8 @@ app.MapRegisterEndpoint();
 app.MapLoginEndpoint();
 app.MapVerifyAccountEndpoint();
 app.MapLogoutEndpoint();
+app.MapResendVerificationEndpoint();
+
 app.MapGet("/", static () => "Hello World!");
 
 app.UseAuthentication();

@@ -11,6 +11,7 @@ global using DataFlow.Server.API.Authentication;
 global using DataFlow.Server.API.Authentication.Login;
 global using DataFlow.Server.API.Authentication.Logout;
 global using DataFlow.Server.API.Authentication.Register;
+global using DataFlow.Server.API.Authentication.ResendVerificationEmail;
 global using DataFlow.Server.API.Authentication.Verify;
 global using DataFlow.Server.API.Cors;
 global using DataFlow.Server.API.Data;
