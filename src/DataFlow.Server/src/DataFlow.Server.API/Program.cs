@@ -53,6 +53,19 @@ if (app.Environment.IsDevelopment())
   app.MapOpenApi();
 }
 
+app.Use((context, next) =>
+{
+  try
+  {
+    return next(context);
+  }
+  catch (Exception ex)
+  {
+    context.Response.StatusCode = 500;
+    return context.Response.WriteAsync(ex.Message);
+  }
+});
+
 app.UseStatusCodePages();
 
 app.UseHttpsRedirection();

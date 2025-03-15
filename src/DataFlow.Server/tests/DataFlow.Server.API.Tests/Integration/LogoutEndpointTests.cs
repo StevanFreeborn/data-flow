@@ -14,7 +14,7 @@ public class LogoutEndpointTests(AppFactory factory) : IntegrationTest(factory)
     var logoutResponseBody = await logoutResponse.Content.ReadFromJsonAsync<ProblemDetails>();
 
     logoutResponseBody.Should().NotBeNull();
-    logoutResponseBody?.Title.Should().Be("Unable to logout user");
+    logoutResponseBody!.Title.Should().Be("Unauthorized");
   }
 
   [Fact]

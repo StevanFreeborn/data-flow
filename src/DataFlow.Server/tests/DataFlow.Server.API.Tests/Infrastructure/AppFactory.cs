@@ -1,6 +1,3 @@
-using System.Globalization;
-
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 
 namespace DataFlow.Server.API.Tests.Infrastructure;
@@ -28,22 +25,7 @@ public class AppFactory : WebApplicationFactory<Program>, IAsyncLifetime
   {
     ArgumentNullException.ThrowIfNull(builder);
 
-    var settings = $$"""
-    {
-      "JwtOptions": {
-      "Secret": {{TestJwtTokenBuilder.TestJwtSecret}},
-      "Issuer": "TestIssuer",
-      "Audience": "TestAudience",
-      "ExpiryInMinutes": 5
-      }
-    }
-    """;
-
-    var config = new ConfigurationBuilder()
-      .AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(settings)))
-      .Build();
-
-    builder.ConfigureAppConfiguration((_, c) => c.AddConfiguration(config));
+    builder.UseConfiguration(TestJwtTokenBuilder.ToConfig());
 
     builder.ConfigureLogging(l => l.ClearProviders());
 

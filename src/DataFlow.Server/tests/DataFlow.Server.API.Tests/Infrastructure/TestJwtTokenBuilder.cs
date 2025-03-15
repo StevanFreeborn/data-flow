@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace DataFlow.Server.API.Tests.Infrastructure;
 
 public class TestJwtTokenBuilder
@@ -6,6 +8,25 @@ public class TestJwtTokenBuilder
   public static readonly string TestJwtAudience = "TestAudience";
   public static readonly string TestJwtIssuer = "TestIssuer";
   public static readonly int TestJwtExpiryInMinutes = 5;
+
+  public static IConfiguration ToConfig()
+  {
+    var json = $@"
+    {{
+      ""JwtOptions"": {{
+        ""Secret"": ""{TestJwtSecret}"",
+        ""Issuer"": ""{TestJwtIssuer}"",
+        ""Audience"": ""{TestJwtAudience}"",
+        ""ExpiryInMinutes"": {TestJwtExpiryInMinutes}
+      }}
+    }}
+    ";
+
+    return new ConfigurationBuilder()
+      .AddJsonStream(new MemoryStream(Encoding.UTF8.GetBytes(json)))
+      .Build();
+  }
+
   private readonly List<Claim> _claims = [];
   private DateTime IssuedAt { get; set; } = DateTime.UtcNow;
 
