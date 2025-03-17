@@ -149,6 +149,10 @@ internal class TokenService(
 
   public async Task RevokeUserVerificationTokensAsync(string userId)
   {
+    // TODO: So we could page over
+    // the tokens and revoke them
+    // this seems noisy...could we just
+    // update them all at once?
     var filter = FilterSpecification<BaseToken>.From(t => t.UserId == userId && t.TokenType == TokenTypes.Verification);
     var existingTokens = await _tokenRepository.GetAsync(filter);
   }

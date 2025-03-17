@@ -3,9 +3,9 @@ namespace DataFlow.Server.API.Data;
 internal interface IRepository<T> where T : Entity
 {
   IAsyncEnumerable<Page<T>> GetAsync(
-    int pageSize,
     FilterSpecification<T> spec,
-    SortSpecification<T> sort
+    SortSpecification<T> sort,
+    int pageSize = 100
   );
   Task<Page<T>> GetAsync(
     int pageNumber,

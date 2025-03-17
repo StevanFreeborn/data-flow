@@ -63,7 +63,7 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
     var filter = FilterSpecification<User>.All;
     var sort = SortSpecification<User>.SortBy(static u => u.CreatedDate);
 
-    await foreach (var page in _sut.GetAsync(pageSize, filter, sort))
+    await foreach (var page in _sut.GetAsync(filter, sort, pageSize))
     {
       retrievedPages.Add(page);
     }
@@ -90,7 +90,7 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
     var filter = FilterSpecification<User>.All;
     var sort = SortSpecification<User>.SortBy(static u => u.Username);
 
-    await foreach (var page in _sut.GetAsync(1, filter, sort))
+    await foreach (var page in _sut.GetAsync(filter, sort, 1))
     {
       retrievedPages.Add(page);
     }
@@ -116,7 +116,7 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
     var filter = FilterSpecification<User>.All;
     var sort = SortSpecification<User>.SortByDesc(static u => u.UpdatedDate);
 
-    await foreach (var page in _sut.GetAsync(1, filter, sort))
+    await foreach (var page in _sut.GetAsync(filter, sort, 1))
     {
       retrievedPages.Add(page);
     }
@@ -124,5 +124,30 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
     retrievedPages.Count.Should().Be(2);
     retrievedPages.First().Items.First().Id.Should().Be(secondUser.Id);
     retrievedPages.Last().Items.First().Id.Should().Be(firstUser.Id);
+  }
+
+  [Fact]
+  public async Task GetAsync_WhenCalledWithPageSizeAndFilter_ItShouldReturnFilteredUsers()
+  {
+    var (_, users) = FakeDataFactory.TestUser.Generate(2);
+    var firstUser = users.First();
+    var secondUser = users.Last();
+
+    firstUser.Username = "A";
+    secondUser.Username = "Z";
+
+    await _context.GetCollection<User>().InsertManyAsync(users);
+
+    var retrievedPages = new List<Page<User>>();
+    var filter = FilterSpecification<User>.From(static u => u.Username == "Z");
+    var sort = SortSpecification<User>.SortBy(static u => u.Username);
+
+    await foreach (var page in _sut.GetAsync(filter, sort, 1))
+    {
+      retrievedPages.Add(page);
+    }
+
+    retrievedPages.Count.Should().Be(1);
+    retrievedPages.First().Items.First().Id.Should().Be(secondUser.Id);
   }
 }

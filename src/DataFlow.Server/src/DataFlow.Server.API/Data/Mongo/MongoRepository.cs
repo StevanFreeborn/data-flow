@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace DataFlow.Server.API.Data.Mongo;
 
 internal abstract class MongoRepository<T>(MongoDbContext context) : IRepository<T> where T : Entity
@@ -8,7 +6,7 @@ internal abstract class MongoRepository<T>(MongoDbContext context) : IRepository
   private const string ItemsFacetName = "items";
   private protected readonly IMongoCollection<T> _collection = context.GetCollection<T>();
 
-  public virtual async IAsyncEnumerable<Page<T>> GetAsync(int pageSize, FilterSpecification<T> filter, SortSpecification<T> sort)
+  public virtual async IAsyncEnumerable<Page<T>> GetAsync(FilterSpecification<T> filter, SortSpecification<T> sort, int pageSize = 100)
   {
     var initialPageNumber = 1;
     int totalPages;
