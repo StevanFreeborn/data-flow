@@ -67,4 +67,9 @@ internal sealed class UserGenerator
   {
     return (Password, _userFaker.Generate());
   }
+
+  internal (string userPassword, List<User> users) Generate(int count)
+  {
+    return (Password, _userFaker.Generate(count));
+  }
 }

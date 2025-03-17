@@ -96,6 +96,7 @@ internal class TokenService(
 
   public Task<Result<(string AccessToken, RefreshToken RefreshToken)>> RefreshAccessTokenAsync(string userId, string refreshToken)
   {
+    throw new NotImplementedException();
   }
 
   public async Task RemoveAllInvalidRefreshTokensAsync(string userId)
