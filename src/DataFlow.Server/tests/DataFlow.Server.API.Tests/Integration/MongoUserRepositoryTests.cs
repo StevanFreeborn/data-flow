@@ -1,6 +1,6 @@
 namespace DataFlow.Server.API.Tests.Integration;
 
-public class MongoUserRepositoryTests : IClassFixture<TestDb>
+public class MongoUserRepositoryTests : IClassFixture<TestDb>, IAsyncLifetime
 {
   private readonly MongoDbContext _context;
   private readonly MongoUserRepository _sut;
@@ -11,6 +11,11 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
 
     _context = testDb.Context;
     _sut = new MongoUserRepository(_context);
+  }
+
+  public Task InitializeAsync()
+  {
+    return Task.CompletedTask;
   }
 
   [Fact]
@@ -70,8 +75,6 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
 
     retrievedPages.Count.Should().Be(expectedPages);
     retrievedPages.SelectMany(static p => p.Items).Count().Should().Be(numberOfUsers);
-
-    await _context.GetCollection<User>().DeleteManyAsync(FilterDefinition<User>.Empty);
   }
 
   [Fact]
@@ -149,5 +152,10 @@ public class MongoUserRepositoryTests : IClassFixture<TestDb>
 
     retrievedPages.Count.Should().Be(1);
     retrievedPages.First().Items.First().Id.Should().Be(secondUser.Id);
+  }
+
+  public async Task DisposeAsync()
+  {
+    await _context.GetCollection<User>().DeleteManyAsync(FilterDefinition<User>.Empty);
   }
 }
