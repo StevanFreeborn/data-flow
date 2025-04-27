@@ -1,6 +1,6 @@
 namespace DataFlow.Server.API.Tests.Integration;
 
-public class TokenServiceTests : IClassFixture<TestDb>
+public class TokenServiceTests : IClassFixture<TestDb>, IAsyncLifetime
 {
   private readonly Mock<TimeProvider> _timeProviderMock = new();
   private readonly Mock<IOptions<JwtOptions>> _jwtOptionsMock = new();
@@ -25,6 +25,11 @@ public class TokenServiceTests : IClassFixture<TestDb>
       _jwtOptionsMock.Object,
       _loggerMock.Object
     );
+  }
+
+  public Task InitializeAsync()
+  {
+    return Task.CompletedTask;
   }
 
   [Fact]
@@ -120,6 +125,59 @@ public class TokenServiceTests : IClassFixture<TestDb>
     revokedRefreshToken.Should().NotBeNull();
     countOfTokens.Should().Be(3);
 
+    await _tokenRepository.DeleteManyAsync(FilterSpecification<BaseToken>.All);
+  }
+
+  [Fact]
+  public async Task RevokeUserVerificationTokensAsync_WhenCalled_ItShouldRevokeAllUsersVerificationTokens()
+  {
+    var userId = Guid.NewGuid().ToString();
+    var verificationTokens = FakeDataFactory.VerificationToken
+      .Generate(2)
+      .Select(t => new VerificationToken(t)
+      {
+        UserId = userId,
+      });
+
+    var anotherUserVerificationToken = new VerificationToken(FakeDataFactory.VerificationToken.Generate())
+    {
+      UserId = Guid.NewGuid().ToString(),
+    };
+
+    var refreshToken = new RefreshToken(FakeDataFactory.RefreshToken.Generate())
+    {
+      UserId = userId,
+    };
+
+    BaseToken[] tokens = [.. verificationTokens, refreshToken, anotherUserVerificationToken];
+
+    foreach (var token in tokens)
+    {
+      await _tokenRepository.CreateAsync(token);
+    }
+
+    await _tokenService.RevokeUserVerificationTokensAsync(userId);
+
+    var createdOtherUserToken = await _tokenRepository.GetAsync(FilterSpecification<BaseToken>.From(t => t.Id == anotherUserVerificationToken.Id));
+    var createdRefreshToken = await _tokenRepository.GetAsync(FilterSpecification<BaseToken>.From(t => t.Id == refreshToken.Id));
+
+    createdOtherUserToken!.Revoked.Should().BeFalse();
+    createdRefreshToken!.Revoked.Should().BeFalse();
+
+    var filter = FilterSpecification<BaseToken>.From(t => t.UserId == userId && t.TokenType == TokenTypes.Verification);
+    var sort = SortSpecification<BaseToken>.SortBy(t => t.ExpiresAt);
+
+    await foreach (var token in _tokenRepository.GetAsync(filter, sort))
+    {
+      foreach (var t in token.Items)
+      {
+        t.Revoked.Should().BeTrue();
+      }
+    }
+  }
+
+  public async Task DisposeAsync()
+  {
     await _tokenRepository.DeleteManyAsync(FilterSpecification<BaseToken>.All);
   }
 }

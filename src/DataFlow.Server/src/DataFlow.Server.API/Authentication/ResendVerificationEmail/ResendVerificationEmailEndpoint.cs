@@ -6,9 +6,7 @@ internal static class ResendVerificationEmailEndpoint
 
   public static void MapResendVerificationEndpoint(this WebApplication app)
   {
-    app
-      .MapPost(Route, HandleAsync)
-      .RequireAuthorization();
+    app.MapPost(Route, HandleAsync);
   }
 
   private static async Task<IResult> HandleAsync([AsParameters] ResendVerificationEmailRequest req)

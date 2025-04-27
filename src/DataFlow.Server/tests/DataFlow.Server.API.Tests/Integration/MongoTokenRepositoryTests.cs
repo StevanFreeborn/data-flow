@@ -1,6 +1,6 @@
 namespace DataFlow.Server.API.Tests.Integration;
 
-public class MongoTokenRepositoryTests : IClassFixture<TestDb>
+public class MongoTokenRepositoryTests : IClassFixture<TestDb>, IAsyncLifetime
 {
   private readonly MongoDbContext _context;
   private readonly MongoTokenRepository _sut;
@@ -13,6 +13,10 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>
     _sut = new MongoTokenRepository(_context);
   }
 
+  public Task InitializeAsync()
+  {
+    return Task.CompletedTask;
+  }
 
   [Fact]
   public async Task CreateAsync_WhenCalled_ItShouldCreateToken()
@@ -44,5 +48,10 @@ public class MongoTokenRepositoryTests : IClassFixture<TestDb>
 
     result.Should().NotBeNull();
     result!.Id.Should().Be(newToken.Id);
+  }
+
+  public async Task DisposeAsync()
+  {
+    await _context.GetCollection<BaseToken>().DeleteManyAsync(FilterDefinition<BaseToken>.Empty);
   }
 }
